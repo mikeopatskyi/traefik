@@ -1,0 +1,6 @@
+http:
+  middlewares:
+    authtraefik:
+      basicAuth:
+        users:
+          - "creomatix:$2y$10$j1Z/DMdy6/e1PgDEmG8bru0gTEOX42GUSygeoqU2hC/v9j05l7rYe"

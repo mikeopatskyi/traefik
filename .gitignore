@@ -1,0 +1,12 @@
+# Ignore all websites in apps/
+apps/*
+
+# But keep the folder itself
+!apps/.keep
+
+# Common app artifacts
+apps/*/node_modules
+apps/*/.next
+apps/*/dist
+apps/*/vendor
+apps/*/.env

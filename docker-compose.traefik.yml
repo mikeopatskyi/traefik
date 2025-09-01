@@ -1,0 +1,51 @@
+services:
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    restart: unless-stopped
+    command:
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.directory=/etc/traefik/conf"
+      - "--providers.file.watch=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
+      - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.myresolver.acme.email=creomatix@gmail.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+      # - "--log.level=DEBUG" # very verbose (useful only for deep debugging).
+      # - "--log.level=INFO" # default, lots of noise.
+      # - "--log.level=WARN" # only warnings & errors.
+      - "--log.level=ERROR" # only errors
+    networks:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/conf:/etc/traefik/conf
+      - ./traefik/letsencrypt:/letsencrypt
+    labels:
+      - 'traefik.enable=true'
+
+      # Traefik dashboard over HTTPS + auth
+      - 'traefik.http.routers.traefik.rule=Host(`traefik.creomatix.dev`)'
+      - 'traefik.http.routers.traefik.entrypoints=websecure'
+      - 'traefik.http.routers.traefik.tls.certresolver=myresolver'
+      - 'traefik.http.routers.traefik.service=api@internal'
+      - "traefik.http.routers.traefik.middlewares=authtraefik@file"
+
+      # Global HTTP -> HTTPS redirect
+      - 'traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https'
+      - 'traefik.http.routers.http-catchall.rule=HostRegexp(`{host:.+}`)'
+      - 'traefik.http.routers.http-catchall.entrypoints=web'
+      - 'traefik.http.routers.http-catchall.middlewares=redirect-to-https'
+
+networks:
+  web:
+    external: true
+
