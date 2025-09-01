@@ -1,0 +1,35 @@
+http:
+  routers:
+    site_www_https:
+      rule: "Host(`www.creomatix.com`)"
+      entryPoints: ["websecure"]
+      tls: { certResolver: myresolver }
+      service: creo_client_svc
+
+    site_apex_http:
+      rule: "Host(`creomatix.com`)"
+      entryPoints: ["web"]
+      middlewares: ["to_www"]
+      service: creo_client_svc
+      priority: 60
+
+    site_apex_https:
+      rule: "Host(`creomatix.com`)"
+      entryPoints: ["websecure"]
+      tls: { certResolver: myresolver }
+      middlewares: ["to_www"]
+      service: creo_client_svc
+
+  middlewares:
+    to_www:
+      redirectRegex:
+        regex: "^https?://creomatix\\.com(.*)"
+        replacement: "https://www.creomatix.com$1"
+        permanent: true
+
+  services:
+    creo_client_svc:
+      loadBalancer:
+        servers:
+          - url: "http://prod-creomatix-client:3000"
+

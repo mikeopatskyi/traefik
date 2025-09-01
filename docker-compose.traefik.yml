@@ -7,7 +7,9 @@ services:
       - "--api.dashboard=true"
       - "--api.insecure=false"
       - "--providers.docker=true"
+      - "--providers.docker.watch=true"
       - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=web"
       - "--providers.file.directory=/etc/traefik/conf"
       - "--providers.file.watch=true"
       - "--entrypoints.web.address=:80"
@@ -19,7 +21,7 @@ services:
       # - "--log.level=DEBUG" # very verbose (useful only for deep debugging).
       # - "--log.level=INFO" # default, lots of noise.
       # - "--log.level=WARN" # only warnings & errors.
-      - "--log.level=ERROR" # only errors
+      # - "--log.level=ERROR" # only errors
     networks:
       - web
     ports:
